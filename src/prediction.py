@@ -6,7 +6,7 @@ import json
 
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
-MODEL_PATH = "models/image_classifier_model.h5"
+MODEL_PATH = "models/image_classifier_model.keras"
 CLASS_INDICES_PATH = "models/class_indices.json"  # Save class indices from training
 
 def load_model():
