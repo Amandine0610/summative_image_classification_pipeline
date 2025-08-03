@@ -653,4 +653,4 @@ def model_architecture_page(model):
     st.table(config_df)
 
 if __name__ == "__main__":
-    main()
+    st.set_page_config(page_title="My App")
