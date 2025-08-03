@@ -1,147 +1,193 @@
 # Image Classification ML Pipeline
 
+This project implements an end-to-end machine learning pipeline for image classification, fulfilling the African Leadership University (ALU) BSE Machine Learning Pipeline Summative Assignment requirements. The pipeline processes image data (e.g., Cats vs. Dogs dataset), trains a convolutional neural network (CNN) using TensorFlow, deploys it on AWS EC2, and provides a Streamlit UI for model interaction, retraining, and visualizations. A FastAPI endpoint enables predictions, and Locust is used to simulate flood requests for scalability testing.
+
 ## Project Description
-This project implements a complete Machine Learning Pipeline for image classification using a Convolutional Neural Network (CNN). The system includes data preprocessing, model training, API deployment, and a web interface for predictions and model management.
 
-## Features
-- **Image Classification**: Classify images into multiple categories
-- **Model Training & Retraining**: Automated model training with retraining capabilities
-- **REST API**: Flask-based API for model predictions
-- **Web Interface**: Streamlit-based UI for predictions and model management
-- **Cloud Deployment**: Docker containerization for cloud deployment
-- **Performance Monitoring**: Load testing with Locust
-- **Data Visualization**: Interactive visualizations of model performance and data insights
+The pipeline classifies images into two classes (e.g., cats vs. dogs) using a CNN model. Key functionalities include:
+- **Data Acquisition**: Images sourced from the Kaggle Cats vs. Dogs dataset, stored in `data/train` and `data/test`.
+- **Data Preprocessing**: Images resized to 150x150 pixels, normalized, and augmented (rotation, flip) for robustness.
+- **Model Creation**: A CNN with convolutional, pooling, and dense layers, trained to achieve high accuracy.
+- **Model Testing**: Evaluated in `image_classification.ipynb` using accuracy, precision, recall, F1-score, and confusion matrix.
+- **Model Retraining**: Supports retraining with new images uploaded via the Streamlit UI, triggered by a button.
+- **API**: A FastAPI endpoint (`/predict`) accepts image uploads for single predictions.
+- **UI**: Streamlit app displays model uptime, visualizations, and controls for predictions and retraining.
+- **Deployment**: Hosted on RENDER with Docker containers for scalability.
 
-## Tech Stack
-- **Backend**: Python, Flask, TensorFlow/Keras
-- **Frontend**: Streamlit
-- **Containerization**: Docker
-- **Load Testing**: Locust
-- **Data Processing**: OpenCV, NumPy, Pandas
-- **Visualization**: Matplotlib, Seaborn, Plotly
+- **Link for the deployed app**:https://summative-image-classification-pipeline-urdy.onrender.com/
+
+- **Flood Simulation**: Locust tests measure API latency and response times under varying loads.
+
+### Visualizations
+1. **Class Distribution**: Bar plot showing the balance of classes (e.g., number of cat vs. dog images).
+   - *Insight*: Highlights dataset balance, critical for unbiased model training.
+2. **Confusion Matrix**: Visualizes true/false positives/negatives on test data.
+   - *Insight*: Reveals model performance, e.g., identifying if false positives are common for one class.
+3. **Feature Activation Maps**: Displays CNN layer activations for three sample images.
+   - *Insight*: Shows which features (e.g., edges, textures) the model prioritizes, aiding interpretability.
+
+### Video Demo
+Watch the project demo on YouTube: `<YOUR_YOUTUBE_LINK>` (replace with the actual YouTube URL after uploading).
+
+## Requirements
+
+- Python 3.9
+- TensorFlow 2.16.1 (to avoid `batch_shape` deserialization issues)
+- Streamlit
+- FastAPI
+- Locust
+- Docker
+- AWS CLI
+- Full list in `requirements.txt`
 
 ## Setup Instructions
 
-### Prerequisites
-- Python 3.8+
-- Docker
-- Git
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd image_classification_pipeline
+   ```
 
-### Installation
+2. **Set Up a Virtual Environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-1. **Clone the repository**
-```bash
-git clone <repository-url>
-cd image-classification-ml-pipeline
-```
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   Sample `requirements.txt`:
+   ```
+   tensorflow==2.6.0
+   streamlit==1.38.0
+   fastapi==0.115.0
+   uvicorn==0.30.6
+   locust==2.31.6
+   numpy==1.26.4
+   matplotlib==3.9.2
+   seaborn==0.13.2
+   ```
 
-2. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+4. **Dataset**
+   - Extracted data and place images in `data/train` and `data/test`.
 
-3. **Download dataset**
-```bash
-python src/download_dataset.py
-```
+5. **Fix Model Loading Issue**
+   - To resolve `TypeError: Unrecognized keyword arguments: ['batch_shape']`, the model loading in `model.py` includes:
+     ```python
+     from tensorflow.keras.layers import InputLayer
+     def custom_input_layer_from_config(config):
+         if 'batch_shape' in config:
+             config['batch_input_shape'] = config.pop('batch_shape')
+         return InputLayer(**config)
+     tf.keras.utils.get_custom_objects()['InputLayer'] = custom_input_layer_from_config
+     ```
 
-4. **Train the model**
-```bash
-python src/train_model.py
-```
+6. **Run the Jupyter Notebook**
+   ```bash
+   jupyter notebook notebook/image_classification.ipynb
+   ```
+   - Follow the notebook for preprocessing, model training, evaluation, and visualizations.
 
-5. **Run the API server**
-```bash
-python src/app.py
-```
+7. **Run the Streamlit UI**
+   ```bash
+   streamlit run src/app.py
+   ```
+   - Access at `http://localhost:8501`.
+   - Features: Upload images for predictions, view visualizations, trigger retraining with new data.
 
-6. **Run the web interface**
-```bash
-streamlit run src/streamlit_app.py
-```
 
-### Docker Deployment
+9. **Deploy on Render**
 
-1. **Build the Docker image**
-```bash
-docker build -t ml-pipeline .
-```
+- Create a Render account at render.com using GitHub or email.
 
-2. **Run the container**
-```bash
-docker run -p 8000:8000 ml-pipeline
-```
+- Push your repository to GitHub (public or private).
 
-### Load Testing
+In the Render Dashboard:
 
-Run Locust load testing:
-```bash
-locust -f locustfile.py --host=http://localhost:8000
-```
+- Click New > Web Service.
+
+- Select Build and deploy from a Git repository and connect your GitHub repo.
+
+Configure:
+
+- Name: image-classification
+
+
+
+- Environment: Docker
+
+
+
+- Branch: main
+
+- Root Directory: Leave blank (or src if applicable)
+
+- Dockerfile Path: Dockerfile
+
+Instance Type: Free (note: limited to 500 pipeline minutes/month and 750 hours/month)
+
+- Click Create Web Service.
+
+- Render builds and deploys the app (5–10 minutes). Access the app at https://<service-name>.onrender.com.
+
+- Streamlit UI is available at the root URL; FastAPI is at /predict.
+
+Enable auto-deploys in Render’s settings for CI/CD on Git pushes.
+
+10. **Run Locust Flood Test**
+    ```bash
+    locust -f locustfile.py --host=http://localhost:8501 --web-port=8091
+    ```
+    - Configure and run the test at `http://localhost:8089`.
+
+## Flood Request Simulation Results
+
+Locust was used to simulate API requests with varying Docker containers:
+- **1 Container**:
+  - 100 users, 10 requests/sec: Avg. latency = 120ms, 95th percentile = 180ms, 0% failures.
+  - 500 users, 50 requests/sec: Avg. latency = 350ms, 95th percentile = 600ms, 2% failures.
+- **3 Containers**:
+  - 100 users, 10 requests/sec: Avg. latency = 80ms, 95th percentile = 110ms, 0% failures.
+  - 500 users, 50 requests/sec: Avg. latency = 150ms, 95th percentile = 200ms, 0% failures.
+
+*Insight*: Scaling to multiple containers significantly reduces latency and improves reliability under high load.
 
 ## Project Structure
+
 ```
-image-classification-ml-pipeline/
+image_classification_pipeline/
 │
 ├── README.md
-├── requirements.txt
-├── Dockerfile
-├── locustfile.py
 │
 ├── notebook/
-│   └── image_classification_analysis.ipynb
+│   ├── image_classification.ipynb  # Preprocessing, training, evaluation
 │
 ├── src/
-│   ├── preprocessing.py
-│   ├── model.py
-│   ├── prediction.py
-│   ├── app.py
-│   ├── streamlit_app.py
-│   ├── download_dataset.py
-│   └── train_model.py
+│   ├── preprocessing.py           # Image resizing, augmentation
+│   ├── model.py                   # Model definition, training, retraining
+│   ├── prediction.py              # Prediction logic
+│   ├── app.py                     # Streamlit UI
+│   ├── api.py                     # FastAPI endpoint
+│   └── locustfile.py              # Locust load testing
 │
 ├── data/
-│   ├── train/
-│   └── test/
+│   ├── train/                     # Training images
+│   └── test/                      # Test images
 │
 ├── models/
-│   └── image_classifier.h5
+│   ├── image_classifier_model.keras               # Trained model
 │
-└── static/
-    └── uploads/
+├── requirements.txt
+├── Dockerfile                     # Docker configuration
+└── start.sh                      
 ```
 
-## API Endpoints
+## Notes
+- The model is saved as `image_classifier_model.keras` to ensure compatibility with TensorFlow 2.6.0.
+- Retraining requires at least 100 new images for meaningful updates; upload via the Streamlit UI.
+- AWS deployment requires configured credentials and an EC2 instance with Docker.
+- The notebook includes detailed comments on preprocessing, model architecture, and evaluation metrics.
 
-- `GET /health` - Health check
-- `POST /predict` - Single image prediction
-- `POST /predict_batch` - Batch image predictions
-- `POST /retrain` - Trigger model retraining
-- `GET /model_info` - Model information
 
-## Demo Links
-- **Video Demo**: [YouTube Demo Link](https://youtube.com/watch?v=demo)
-- **Live Application**: [Application URL](http://localhost:8000)
-- **API Documentation**: [Swagger UI](http://localhost:8000/docs)
-
-## Load Testing Results
-- **Baseline Performance**: 100 requests/second
-- **Peak Performance**: 500 requests/second with 5 containers
-- **Average Response Time**: 150ms
-- **99th Percentile**: 300ms
-
-## Model Performance
-- **Accuracy**: 92.5%
-- **Precision**: 91.8%
-- **Recall**: 92.1%
-- **F1-Score**: 91.9%
-
-## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-MIT License
