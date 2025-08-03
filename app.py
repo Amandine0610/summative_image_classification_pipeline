@@ -10,7 +10,7 @@ from io import BytesIO
 # Constants
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
-MODEL_PATH = "models/image_classifier_model.h5"
+MODEL_PATH = "models/image_classifier_model.keras"
 CLASS_INDICES_PATH = "models/class_indices.json"
 
 @st.cache(allow_output_mutation=True)
