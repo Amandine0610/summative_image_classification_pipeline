@@ -303,27 +303,50 @@ class ImagePreprocessor:
         
         return np.array(balanced_images), np.array(balanced_labels)
     
-    def split_data(self, images, labels, test_size=0.2, val_size=0.1):
-        """Split data into train, validation, and test sets with stratification"""
-        # First split: train+val and test
-        X_temp, X_test, y_temp, y_test = train_test_split(
-            images, labels, test_size=test_size, random_state=42, stratify=labels
-        )
-        
-        # Second split: train and val
-        val_size_adjusted = val_size / (1 - test_size)
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_temp, y_temp, test_size=val_size_adjusted, random_state=42, stratify=y_temp
-        )
-        
-        logger.info(f"Data split - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
-        
-        # Log class distribution in each split
-        for split_name, split_labels in [("Train", y_train), ("Val", y_val), ("Test", y_test)]:
-            unique, counts = np.unique(split_labels, return_counts=True)
-            logger.info(f"{split_name} distribution: {dict(zip(unique, counts))}")
-        
-        return X_train, X_val, X_test, y_train, y_val, y_test
+    def split_data(self, images, labels, test_size=0.3, val_size=0.1):
+     """Split data into train, validation, and test sets with stratification"""
+
+     n_samples = len(labels)
+     n_classes = len(np.unique(labels))
+
+     # Calculate minimum test size to cover all classes
+     min_test_samples = n_classes
+     min_test_fraction = min_test_samples / n_samples
+
+    # Adjust test_size if too small
+     if test_size < min_test_fraction:
+         logger.warning(f"test_size too small for stratification; adjusting from {test_size} to {min_test_fraction:.3f}")
+         test_size = min_test_fraction
+
+     # First split: train+val and test
+     X_temp, X_test, y_temp, y_test = train_test_split(
+         images, labels, test_size=test_size, random_state=42, stratify=labels
+     )
+    
+     # Adjust val_size relative to remaining data
+     val_size_adjusted = val_size / (1 - test_size)
+
+     # Ensure val_size_adjusted is also valid for stratify (optional)
+     n_temp = len(y_temp)
+     min_val_samples = n_classes
+     min_val_fraction = min_val_samples / n_temp
+     if val_size_adjusted < min_val_fraction:
+         logger.warning(f"val_size too small for stratification; adjusting from {val_size_adjusted:.3f} to {min_val_fraction:.3f}")
+         val_size_adjusted = min_val_fraction
+
+     # Second split: train and val
+     X_train, X_val, y_train, y_val = train_test_split(
+         X_temp, y_temp, test_size=val_size_adjusted, random_state=42, stratify=y_temp
+     )
+    
+     logger.info(f"Data split - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
+
+     for split_name, split_labels in [("Train", y_train), ("Val", y_val), ("Test", y_test)]:
+         unique, counts = np.unique(split_labels, return_counts=True)
+         logger.info(f"{split_name} distribution: {dict(zip(unique, counts))}")
+
+     return X_train, X_val, X_test, y_train, y_val, y_test
+
     
     def save_label_encoder(self, filepath):
         """Save label encoder"""
