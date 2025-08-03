@@ -13,3 +13,4 @@ setuptools==70.3.0
 locust==2.31.6
 requests==2.32.3
 opencv-python-headless
+plotly==5.15.0
