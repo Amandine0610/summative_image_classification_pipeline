@@ -23,8 +23,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+RUN curl -o models/image_classifier_model.h5 https://your-link-to-model/image_classifier_model.h5
+
 # Create necessary directories
 RUN mkdir -p models static data/train data/test uploads templates
+
+# Check contents of models directory
+RUN ls -l models/
 
 # Set environment variables
 ENV PYTHONPATH=/app
