@@ -23,8 +23,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-COPY models/image_classifier_model.h5 models/image_classifier_model.h5
-
 # Create necessary directories
 RUN mkdir -p models static data/train data/test uploads templates
 
