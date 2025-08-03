@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Pipeline Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-training { background-color: #ffc107; }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        .progress-custom {
+            height: 25px;
+            border-radius: 15px;
+        }
+        .btn-custom {
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 500;
+        }
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-brain"></i> ML Pipeline Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/visualizations">
+                    <i class="fas fa-chart-bar"></i> Visualizations
+                </a>
+                <a class="nav-link" href="/status">
+                    <i class="fas fa-info-circle"></i> Status
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Status Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card text-center">
+                    <i class="fas fa-server fa-2x mb-2"></i>
+                    <h5>Model Status</h5>
+                    <p class="mb-0">
+                        {% if model_loaded %}
+                            <span class="status-indicator status-online"></span>Online
+                        {% else %}
+                            <span class="status-indicator status-offline"></span>Offline
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h5>Uptime</h5>
+                    <p class="mb-0">{{ uptime.split('.')[0] }}</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card text-center">
+                    <i class="fas fa-microchip fa-2x mb-2"></i>
+                    <h5>CPU Usage</h5>
+                    <p class="mb-0">{{ "%.1f"|format(system_metrics.cpu_usage) }}%</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card text-center">
+                    <i class="fas fa-memory fa-2x mb-2"></i>
+                    <h5>Memory Usage</h5>
+                    <p class="mb-0">{{ "%.1f"|format(system_metrics.memory_usage) }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Prediction Section -->
+            <div class="col-md-6">
+                <div class="card card-custom">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-image"></i> Image Prediction</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm" enctype="multipart/form-data">
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Drag & drop an image here or click to select</p>
+                                <input type="file" id="imageFile" name="file" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-custom" onclick="document.getElementById('imageFile').click()">
+                                    Choose Image
+                                </button>
+                            </div>
+                            <div id="imagePreview" class="text-center" style="display: none;">
+                                <img id="previewImg" src="" alt="Preview" class="img-fluid mb-3" style="max-height: 200px;">
+                                <button type="submit" class="btn btn-success btn-custom">
+                                    <i class="fas fa-magic"></i> Predict
+                                </button>
+                            </div>
+                        </form>
+                        <div id="predictionResult" class="mt-3" style="display: none;">
+                            <div class="alert alert-success">
+                                <h6>Prediction Result:</h6>
+                                <p class="mb-1"><strong>Class:</strong> <span id="predictedClass"></span></p>
+                                <p class="mb-0"><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Section -->
+            <div class="col-md-6">
+                <div class="card card-custom">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs"></i> Model Training</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if is_training %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-spinner fa-spin"></i> Model is currently being retrained...
+                            </div>
+                        {% else %}
+                            <form id="uploadForm" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="className" class="form-label">Class Name:</label>
+                                    <input type="text" class="form-control" id="className" name="class_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="trainingFiles" class="form-label">Training Images:</label>
+                                    <input type="file" class="form-control" id="trainingFiles" name="files" multiple accept="image/*" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-custom">
+                                    <i class="fas fa-upload"></i> Upload Data
+                                </button>
+                            </form>
+                            <hr>
+                            <button id="retrainBtn" class="btn btn-warning btn-custom">
+                                <i class="fas fa-sync-alt"></i> Trigger Retraining
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Metrics -->
+        {% if model_metrics %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Model Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-success">{{ "%.2f"|format(model_metrics.final_accuracy * 100) }}%</h4>
+                                    <p class="text-muted">Training Accuracy</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-primary">{{ "%.2f"|format(model_metrics.final_val_accuracy * 100) }}%</h4>
+                                    <p class="text-muted">Validation Accuracy</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-warning">{{ "%.4f"|format(model_metrics.final_loss) }}</h4>
+                                    <p class="text-muted">Training Loss</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4 class="text-info">{{ model_metrics.epochs_trained }}</h4>
+                                    <p class="text-muted">Epochs Trained</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Image upload and preview
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#007bff';
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('imageFile').files = files;
+                document.getElementById('imageFile').dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Prediction form submission
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('imageFile');
+            if (!fileInput.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('predictedClass').textContent = result.predicted_class;
+                    document.getElementById('confidence').textContent = (result.confidence * 100).toFixed(2);
+                    document.getElementById('predictionResult').style.display = 'block';
+                } else {
+                    alert('Error: ' + result.detail);
+                }
+            } catch (error) {
+                alert('Error making prediction: ' + error.message);
+            }
+        });
+
+        // Upload form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const className = document.getElementById('className').value;
+            const files = document.getElementById('trainingFiles').files;
+            
+            formData.append('class_name', className);
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            try {
+                const response = await fetch('/upload_data', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message);
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    alert('Error: ' + result.detail);
+                }
+            } catch (error) {
+                alert('Error uploading data: ' + error.message);
+            }
+        });
+
+        // Retrain button
+        document.getElementById('retrainBtn').addEventListener('click', async function() {
+            if (confirm('Are you sure you want to retrain the model? This may take several minutes.')) {
+                try {
+                    const response = await fetch('/retrain', {
+                        method: 'POST'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.detail);
+                    }
+                } catch (error) {
+                    alert('Error starting retraining: ' + error.message);
+                }
+            }
+        });
+
+        // Auto-refresh status every 30 seconds
+        setInterval(function() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update CPU and memory usage
+                    document.querySelector('.col-md-3:nth-child(3) .metric-card p').textContent = 
+                        data.system.cpu_usage.toFixed(1) + '%';
+                    document.querySelector('.col-md-3:nth-child(4) .metric-card p').textContent = 
+                        data.system.memory_usage.toFixed(1) + '%';
+                })
+                .catch(error => console.error('Error fetching status:', error));
+        }, 30000);
+    </script>
+</body>
+</html>

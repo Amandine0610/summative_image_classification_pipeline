@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Visualizations - ML Pipeline</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .viz-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .viz-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .interpretation-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-brain"></i> ML Pipeline Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="/visualizations">
+                    <i class="fas fa-chart-bar"></i> Visualizations
+                </a>
+                <a class="nav-link" href="/status">
+                    <i class="fas fa-info-circle"></i> Status
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-chart-line text-primary"></i> Model Visualizations & Analysis
+                </h2>
+            </div>
+        </div>
+
+        <!-- Training History -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card card-custom">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history"></i> Training History
+                        </h5>
+                    </div>
+                    <div class="card-body viz-container">
+                        <img src="/training_history" alt="Training History" class="img-fluid" 
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPgo8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VHJhaW5pbmcgSGlzdG9yeSBOb3QgQXZhaWxhYmxlPC90ZXh0Pgo8L3N2Zz4=';">
+                        <div class="mt-3">
+                            <p class="text-muted">
+                                This chart shows the model's accuracy and loss progression during training.
+                                The gap between training and validation curves indicates overfitting levels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card card-custom">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table"></i> Confusion Matrix
+                        </h5>
+                    </div>
+                    <div class="card-body viz-container">
+                        <img src="/confusion_matrix" alt="Confusion Matrix" class="img-fluid"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPgo8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q29uZnVzaW9uIE1hdHJpeCBOb3QgQXZhaWxhYmxlPC90ZXh0Pgo8L3N2Zz4=';">
+                        <div class="mt-3">
+                            <p class="text-muted">
+                                The confusion matrix shows how well the model distinguishes between different classes.
+                                Diagonal values represent correct predictions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Interpretations -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-eye"></i> Feature Analysis & Interpretations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Feature 1: Color Distribution -->
+                            <div class="col-lg-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-palette"></i> Color Distribution</h6>
+                                    <div class="interpretation-section bg-white text-dark">
+                                        <h6>Analysis:</h6>
+                                        <p class="mb-2">
+                                            <strong>What it measures:</strong> Average RGB values across image channels
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Story it tells:</strong> Different classes show distinct color patterns:
+                                        </p>
+                                        <ul class="small">
+                                            <li><strong>Cats:</strong> Tend to have warmer tones (browns, oranges)</li>
+                                            <li><strong>Dogs:</strong> More varied color distribution</li>
+                                            <li><strong>Birds:</strong> Often show brighter, more saturated colors</li>
+                                        </ul>
+                                        <p class="mb-0 small">
+                                            <strong>Insight:</strong> Color is a significant discriminative feature, 
+                                            especially for distinguishing birds from mammals.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feature 2: Edge Density -->
+                            <div class="col-lg-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-border-style"></i> Edge Density</h6>
+                                    <div class="interpretation-section bg-white text-dark">
+                                        <h6>Analysis:</h6>
+                                        <p class="mb-2">
+                                            <strong>What it measures:</strong> Number and intensity of edges detected
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Story it tells:</strong> Texture complexity varies by class:
+                                        </p>
+                                        <ul class="small">
+                                            <li><strong>Cats:</strong> Smooth fur creates moderate edge density</li>
+                                            <li><strong>Dogs:</strong> Varied coat types show different patterns</li>
+                                            <li><strong>Birds:</strong> Feathers create high-frequency edge patterns</li>
+                                        </ul>
+                                        <p class="mb-0 small">
+                                            <strong>Insight:</strong> Texture analysis helps distinguish between 
+                                            different animal types based on their surface characteristics.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feature 3: Shape Characteristics -->
+                            <div class="col-lg-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-shapes"></i> Shape Characteristics</h6>
+                                    <div class="interpretation-section bg-white text-dark">
+                                        <h6>Analysis:</h6>
+                                        <p class="mb-2">
+                                            <strong>What it measures:</strong> Aspect ratios and contour properties
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Story it tells:</strong> Body proportions differ significantly:
+                                        </p>
+                                        <ul class="small">
+                                            <li><strong>Cats:</strong> Compact, rounded body shapes</li>
+                                            <li><strong>Dogs:</strong> More elongated, varied proportions</li>
+                                            <li><strong>Birds:</strong> Distinctive wing spans and body ratios</li>
+                                        </ul>
+                                        <p class="mb-0 small">
+                                            <strong>Insight:</strong> Morphological differences provide strong 
+                                            classification signals, especially when combined with pose detection.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Architecture Summary -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sitemap"></i> Model Architecture
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="modelSummary" class="bg-light p-3 rounded">
+                            <p class="text-muted">Loading model architecture...</p>
+                        </div>
+                        <div class="mt-3">
+                            <h6>Architecture Highlights:</h6>
+                            <ul>
+                                <li><strong>Convolutional Layers:</strong> 4 blocks with increasing filter sizes (32→64→128→256)</li>
+                                <li><strong>Regularization:</strong> Batch normalization and dropout layers prevent overfitting</li>
+                                <li><strong>Pooling:</strong> Max pooling reduces spatial dimensions while preserving features</li>
+                                <li><strong>Dense Layers:</strong> Two fully connected layers for final classification</li>
+                                <li><strong>Activation:</strong> ReLU for hidden layers, softmax for output probabilities</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Insights -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-custom">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb"></i> Performance Insights & Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Model Strengths:</h6>
+                                <ul>
+                                    <li>Good generalization with proper regularization</li>
+                                    <li>Effective feature extraction through CNN layers</li>
+                                    <li>Balanced architecture for image classification</li>
+                                    <li>Real-time inference capabilities</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-warning">Areas for Improvement:</h6>
+                                <ul>
+                                    <li>Consider data augmentation for better robustness</li>
+                                    <li>Experiment with transfer learning (ResNet, EfficientNet)</li>
+                                    <li>Implement class balancing if needed</li>
+                                    <li>Add more diverse training data</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h6 class="text-success">Deployment Considerations:</h6>
+                            <p>
+                                The current model provides a good balance between accuracy and inference speed. 
+                                For production deployment, consider implementing model versioning, A/B testing, 
+                                and continuous monitoring of prediction drift.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load model summary
+        fetch('/model_summary')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('modelSummary').innerHTML = 
+                    '<pre class="mb-0">' + data.summary + '</pre>';
+            })
+            .catch(error => {
+                document.getElementById('modelSummary').innerHTML = 
+                    '<p class="text-muted">Model summary not available. Please ensure a model is loaded.</p>';
+            });
+
+        // Refresh visualizations button
+        function refreshVisualizations() {
+            location.reload();
+        }
+
+        // Add refresh button to each visualization card
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card-custom .card-header');
+            cards.forEach(header => {
+                if (header.textContent.includes('Training History') || 
+                    header.textContent.includes('Confusion Matrix')) {
+                    const refreshBtn = document.createElement('button');
+                    refreshBtn.className = 'btn btn-sm btn-light float-end';
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                    refreshBtn.onclick = refreshVisualizations;
+                    header.appendChild(refreshBtn);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
