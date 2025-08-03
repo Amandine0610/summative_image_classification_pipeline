@@ -1,8 +1,10 @@
 FROM python:3.9-slim
 
-# Install system dependencies including curl
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    curl \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -21,11 +23,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Download your model file
 RUN curl -o models/image_classifier_model.h5 https://your-link-to-model/image_classifier_model.h5
 
-# Create necessary directories (if needed)
+# Create necessary directories
 RUN mkdir -p models static data/train data/test uploads templates
+
+# Check contents of models directory
+RUN ls -l models/
 
 # Set environment variables
 ENV PYTHONPATH=/app
