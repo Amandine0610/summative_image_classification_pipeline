@@ -27,7 +27,7 @@ The pipeline classifies images into two classes (e.g., cats vs. dogs) using a CN
    - *Insight*: Shows which features (e.g., edges, textures) the model prioritizes, aiding interpretability.
 
 ### Video Demo
-Watch the project demo on YouTube: `<https://www.youtube.com/watch?v=8nMDTvmKhP0>` (replace with the actual YouTube URL after uploading).
+Watch the project demo on YouTube: `<https://www.youtube.com/watch?v=8nMDTvmKhP0>` 
 
 ## Requirements
 
